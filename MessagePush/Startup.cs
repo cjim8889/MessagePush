@@ -29,6 +29,25 @@ namespace MessagePush
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
+            services.AddAuthentication()
+                .AddJwtBearer(options => {
+                    options.SaveToken = true;
+                    options.RequireHttpsMetadata = false; // remove at prod
+
+                    options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters()
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = Configuration.GetSection("Jwt:Issuer").Value,
+                        ValidAudience = Configuration.GetSection("Jwt:Audience").Value,
+                        IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(Configuration.GetSection("Jwt:SecretKey").Value))
+                    };
+
+
+                
+                });
 
             services.AddSingleton<DatabaseContext>();
 

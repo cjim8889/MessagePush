@@ -15,6 +15,8 @@ namespace MessagePush.Context
             Database = Client.GetDatabase(configuration.GetSection("Mongo:Database").Value);
         }
 
+
+
         public IMongoDatabase Database { get; }
         public MongoClient Client { get; }
 

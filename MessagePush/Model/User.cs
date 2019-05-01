@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.WebUtilities;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
@@ -21,7 +22,7 @@ namespace MessagePush.Model
         {
             Validated = false;
             Subscribers = new List<int>();
-            Roles = new List<string>();
+            Roles = new List<string>() { Role.Standard };
             RegisteredAt = DateTime.Now;
 
             using (RandomNumberGenerator rng = new RNGCryptoServiceProvider())
@@ -36,6 +37,7 @@ namespace MessagePush.Model
                 PushToken = WebEncoders.Base64UrlEncode(pushTokenData);
             }
         }
+
 
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]

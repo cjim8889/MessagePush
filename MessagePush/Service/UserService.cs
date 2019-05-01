@@ -95,6 +95,11 @@ namespace MessagePush.Service
             return await users.Find(x => x.AdminToken == adminToken).FirstOrDefaultAsync();
         }
 
+        public async Task<User> GetUserByEmailAndPasswordAsync(string email, string password)
+        {
+            return await users.Find(x => x.Email == email & x.Password == HashString(password)).FirstOrDefaultAsync();
+        }
+
         public async Task<bool> IsEmailExistsAsync(string email)
         {
             var user = await users.Find(x => x.Email == email).FirstOrDefaultAsync();

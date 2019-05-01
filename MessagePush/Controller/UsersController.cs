@@ -108,5 +108,18 @@ namespace MessagePush.Controller
             return BadRequest(new ReturnMessage() { StatusCode = 2, Message = "Invalid Admin Token" });
         }
 
+        [AllowAnonymous]
+        [HttpGet("login")]
+        public async Task<ActionResult> LogIn([FromQuery] string email, [FromQuery] string password)
+        {
+            var user = await userService.GetUserByEmailAndPasswordAsync(email, password);
+
+            if (user != null)
+            {
+                return Ok(new ReturnMessage() { StatusCode = 1, Message = userService.GenerateJwtToken(user, DateTime.Now.AddHours(1)) });
+            }
+
+            return BadRequest(new ReturnMessage() { StatusCode = 2, Message = "Invalid Email Or Password" });
+        }
     }
 }

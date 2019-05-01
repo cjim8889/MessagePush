@@ -9,11 +9,11 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace MessagePush.Model
 {
-    public enum Role
+    public static class Role
     {
-        Admin,
-        Privileged,
-        Standard
+        public const string Admin = "Admin";
+        public const string Privileged = "Privileged";
+        public const string Standard = "Standard";
     }
     public class User
     {
@@ -21,7 +21,7 @@ namespace MessagePush.Model
         {
             Validated = false;
             Subscribers = new List<int>();
-            Roles = new List<Role>();
+            Roles = new List<string>();
             RegisteredAt = DateTime.Now;
 
             using (RandomNumberGenerator rng = new RNGCryptoServiceProvider())
@@ -62,6 +62,6 @@ namespace MessagePush.Model
         [BsonElement("RegisteredAt")]
         public DateTime RegisteredAt { get; set; }
         [BsonElement("Roles")]
-        public List<Role> Roles { get; set; }
+        public List<string> Roles { get; set; }
     }
 }

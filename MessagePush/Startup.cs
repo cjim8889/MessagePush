@@ -12,6 +12,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MessagePush.Context;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using MessagePush.Service;
 
 namespace MessagePush
 {
@@ -29,8 +31,13 @@ namespace MessagePush
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
-            services.AddAuthentication()
-                .AddJwtBearer(options => {
+            services.AddAuthentication(x =>
+            {
+                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+                .AddJwtBearer(options =>
+                {
                     options.SaveToken = true;
                     options.RequireHttpsMetadata = false; // remove at prod
 
@@ -42,15 +49,16 @@ namespace MessagePush
                         ValidateIssuerSigningKey = true,
                         ValidIssuer = Configuration.GetSection("Jwt:Issuer").Value,
                         ValidAudience = Configuration.GetSection("Jwt:Audience").Value,
-                        IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(Configuration.GetSection("Jwt:SecretKey").Value))
+                        IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(System.Text.Encoding.ASCII.GetBytes(Configuration.GetSection("Jwt:SecretKey").Value))
                     };
 
 
-                
+
                 });
 
             services.AddSingleton<DatabaseContext>();
 
+            services.AddScoped<UserService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -67,6 +75,7 @@ namespace MessagePush
             }
 
             app.UseHttpsRedirection();
+            app.UseAuthentication();
 
 
             app.UseMvc();

@@ -8,6 +8,7 @@ using MessagePush.Context;
 using MessagePush.Service;
 using MessagePush.Model;
 using Microsoft.AspNetCore.Authorization;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace MessagePush.Controller
 {
@@ -21,13 +22,12 @@ namespace MessagePush.Controller
             this.userService = userService;
         }
 
-        [Authorize(Roles = "Standard")]
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<List<User>> GetUsersAsync()
         {
             return await userService.GetUsersAsync();
         }
-
 
     }
 }

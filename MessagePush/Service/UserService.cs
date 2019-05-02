@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using MessagePush.Context;
 using MessagePush.Model;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Driver;
@@ -35,6 +37,22 @@ namespace MessagePush.Service
         public async Task<List<User>> GetUsersAsync()
         {
             return await users.Find(x => true).ToListAsync();
+        }
+
+        public static string GenerateToken()
+        {
+            string token;
+
+            using (RandomNumberGenerator rng = new RNGCryptoServiceProvider())
+            {
+                byte[] TokenData = new byte[32];
+
+                rng.GetBytes(TokenData);
+
+                token = WebEncoders.Base64UrlEncode(TokenData);
+            }
+
+            return token;
         }
 
         public string GenerateJwtToken(User user, DateTime expiryDate)
@@ -83,6 +101,23 @@ namespace MessagePush.Service
         public async Task RemoveUserByIdAsync(string id)
         {
             await users.DeleteOneAsync(x => x.Id == id);
+        }
+
+        public async Task<string[]> RefreshUserToken(string id)
+        {
+
+            var adminToken = GenerateToken();
+            var pushToken = GenerateToken();
+
+            var update = Builders<User>.Update.Set("AdminToken", adminToken).Set("PushToken", pushToken);
+            var result = await users.UpdateOneAsync(x => x.Id == id, update);
+
+            if (result.IsAcknowledged)
+            {
+                return new string[] { adminToken, pushToken };
+            }
+
+            return null;
         }
 
         public async Task<bool> AddRoleToUserAsync(string id, string role)
@@ -136,6 +171,8 @@ namespace MessagePush.Service
 
             return user != null;
         }
+
+
 
         public bool ValidateUserData(User user)
         {

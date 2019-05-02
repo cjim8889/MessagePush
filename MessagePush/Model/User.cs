@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.AspNetCore.WebUtilities;
+using MessagePush.Service;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -25,17 +23,8 @@ namespace MessagePush.Model
             Roles = new HashSet<string>() { Role.Standard };
             RegisteredAt = DateTime.Now;
 
-            using (RandomNumberGenerator rng = new RNGCryptoServiceProvider())
-            {
-                byte[] adminTokenData = new byte[32];
-                byte[] pushTokenData = new byte[32];
-
-                rng.GetBytes(adminTokenData);
-                rng.GetBytes(pushTokenData);
-
-                AdminToken = WebEncoders.Base64UrlEncode(adminTokenData);
-                PushToken = WebEncoders.Base64UrlEncode(pushTokenData);
-            }
+            AdminToken = UserService.GenerateToken();
+            PushToken = UserService.GenerateToken();
         }
 
 

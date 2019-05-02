@@ -39,15 +39,14 @@ namespace MessagePush.Controller
             this.userService = userService;
         }
 
-        //[Authorize(Roles = "Admin")]
-        [AllowAnonymous]
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<List<User>> GetUsersAsync()
         {
             return await userService.GetUsersAsync();
         }
 
-        [AllowAnonymous]
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ActionResult> CreateUser(UserDTO userDTO)
         {
@@ -68,7 +67,16 @@ namespace MessagePush.Controller
             return CreatedAtAction("CreateUser", user);
         }
 
-        [AllowAnonymous]
+        [Authorize]
+        [HttpGet("user")]
+        public async Task<ActionResult<User>> GetUserByClaim()
+        {
+            var id = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
+
+            return Ok(await userService.GetUserByIdAsync(id));
+        }
+
+        [Authorize(Roles = "Admin")]
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> GetUserById(string id)
         {
@@ -81,7 +89,7 @@ namespace MessagePush.Controller
             return NotFound();
         }
 
-        [AllowAnonymous]
+        [Authorize(Roles = "Admin")]
         [HttpGet("{id}/roles")]
         public async Task<ActionResult> GetUserRolesById(string id)
         {

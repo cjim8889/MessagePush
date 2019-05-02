@@ -23,7 +23,12 @@ namespace MessagePush.Controller
             public string Password { get; set; }
         }
 
-        public class AddRolesPost
+        public class AddRoles
+        {
+            public string[] Roles { get; set; }
+        }
+
+        public class RemoveRoles
         {
             public string[] Roles { get; set; }
         }
@@ -100,12 +105,31 @@ namespace MessagePush.Controller
 
         [Authorize(Roles = "Admin")]
         [HttpPost("{id}/roles")]
-        public async Task<ActionResult> AddRolesToUser(string id, [FromBody] AddRolesPost addRolesPost)
+        public async Task<ActionResult> AddRolesToUser(string id, [FromBody] AddRoles addRolesPost)
         {
             var result = await userService.AddRolesToUserAsync(id, addRolesPost.Roles);
 
             return result ? Ok() : (ActionResult)BadRequest();
         }
+
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("{id}/roles/{role}")]
+        public async Task<ActionResult> RemoveRoleOfUser(string id, string role)
+        {
+            var result = await userService.RemoveRoleOfUserAsync(id, role);
+
+            return result ? Ok() : (ActionResult)BadRequest();
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("{id}/roles")]
+        public async Task<ActionResult> RemoveRoleOfUser(string id, [FromBody] RemoveRoles roles)
+        {
+            var result = await userService.RemoveRolesOfUserAsync(id, roles.Roles);
+
+            return result ? Ok() : (ActionResult)BadRequest();
+        }
+
 
         [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]

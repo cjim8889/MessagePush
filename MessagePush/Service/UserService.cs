@@ -94,10 +94,25 @@ namespace MessagePush.Service
         {   
             var update = Builders<User>.Update.AddToSetEach("Roles", roles);
 
+
             var updateResult = await users.UpdateOneAsync(x => x.Id == id, update);
 
             return updateResult.IsAcknowledged;
         }
+
+        public async Task<bool> RemoveRoleOfUserAsync(string id, string role)
+        {
+            return await RemoveRolesOfUserAsync(id, new string[] { role });
+        }
+
+        public async Task<bool> RemoveRolesOfUserAsync(string id, string[] role)
+        {
+            var update = Builders<User>.Update.PullAll("Roles", role);
+            var updateResult = await users.UpdateOneAsync(x => x.Id == id, update);
+
+            return updateResult.IsAcknowledged;
+        }
+
 
 
         public async Task<User> GetUserByIdAsync(string id)

@@ -46,7 +46,8 @@ namespace MessagePush.Controller
             return await userService.GetUsersAsync();
         }
 
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
+        [AllowAnonymous]
         [HttpPost]
         public async Task<ActionResult> CreateUser(UserDTO userDTO)
         {
@@ -87,7 +88,8 @@ namespace MessagePush.Controller
             return Ok(new { tokens.AdminToken, tokens.PushToken });
         }
 
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
+        [AllowAnonymous]
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> GetUserById(string id)
         {
@@ -188,6 +190,11 @@ namespace MessagePush.Controller
         [HttpGet("login")]
         public async Task<ActionResult> LogIn([FromQuery] string email, [FromQuery] string password)
         {
+            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+            {
+                return BadRequest();
+            }
+
             var user = await userService.GetUserByEmailAndPasswordAsync(email, password);
 
             return user != null

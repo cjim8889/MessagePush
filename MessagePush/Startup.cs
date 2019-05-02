@@ -77,6 +77,9 @@ namespace MessagePush
             app.UseHttpsRedirection();
             app.UseAuthentication();
 
+            app.UseDefaultFiles();
+            app.UseStaticFiles();
+
 
             app.UseMvc();
         }

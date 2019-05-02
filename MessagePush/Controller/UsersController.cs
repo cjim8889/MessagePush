@@ -23,6 +23,11 @@ namespace MessagePush.Controller
             public string Password { get; set; }
         }
 
+        public class AddRolesPost
+        {
+            public string[] Roles { get; set; }
+        }
+
         private readonly UserService userService;
         public UsersController(UserService userService)
         {
@@ -72,6 +77,37 @@ namespace MessagePush.Controller
         }
 
         [AllowAnonymous]
+        [HttpGet("{id}/roles")]
+        public async Task<ActionResult> GetUserRolesById(string id)
+        {
+            var user = await userService.GetUserByIdAsync(id);
+            if (user != null)
+            {
+                return Ok(user.Roles);
+            }
+
+            return NotFound();
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPut("{id}/roles/{role}")]
+        public async Task<ActionResult> AddRoleToUser(string id, string role)
+        {
+            var result = await userService.AddRoleToUserAsync(id, role);
+
+            return result ? Ok() : (ActionResult)BadRequest();
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost("{id}/roles")]
+        public async Task<ActionResult> AddRolesToUser(string id, [FromBody] AddRolesPost addRolesPost)
+        {
+            var result = await userService.AddRolesToUserAsync(id, addRolesPost.Roles);
+
+            return result ? Ok() : (ActionResult)BadRequest();
+        }
+
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<ActionResult> RemoveUserById(string id)
         {
@@ -100,12 +136,9 @@ namespace MessagePush.Controller
         {
             var user = await userService.GetUserByAdminTokenAsync(adminToken);
 
-            if (user != null)
-            {
-                return Ok(new ReturnMessage() { StatusCode = 1, Message = userService.GenerateJwtToken(user, DateTime.Now.AddHours(1))});
-            }
-
-            return BadRequest(new ReturnMessage() { StatusCode = 2, Message = "Invalid Admin Token" });
+            return user != null
+                ? Ok(new ReturnMessage() { StatusCode = 1, Message = userService.GenerateJwtToken(user, DateTime.Now.AddHours(1))})
+                : (ActionResult)BadRequest(new ReturnMessage() { StatusCode = 2, Message = "Invalid Admin Token" });
         }
 
         [AllowAnonymous]
@@ -114,12 +147,9 @@ namespace MessagePush.Controller
         {
             var user = await userService.GetUserByEmailAndPasswordAsync(email, password);
 
-            if (user != null)
-            {
-                return Ok(new ReturnMessage() { StatusCode = 1, Message = userService.GenerateJwtToken(user, DateTime.Now.AddHours(1)) });
-            }
-
-            return BadRequest(new ReturnMessage() { StatusCode = 2, Message = "Invalid Email Or Password" });
+            return user != null
+                ? Ok(new ReturnMessage() { StatusCode = 1, Message = userService.GenerateJwtToken(user, DateTime.Now.AddHours(1)) })
+                : (ActionResult)BadRequest(new ReturnMessage() { StatusCode = 2, Message = "Invalid Email Or Password" });
         }
     }
 }

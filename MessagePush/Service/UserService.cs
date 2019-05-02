@@ -85,6 +85,21 @@ namespace MessagePush.Service
             await users.DeleteOneAsync(x => x.Id == id);
         }
 
+        public async Task<bool> AddRoleToUserAsync(string id, string role)
+        {
+            return await AddRolesToUserAsync(id, new string[] { role });
+        }
+
+        public async Task<bool> AddRolesToUserAsync(string id, string[] roles)
+        {   
+            var update = Builders<User>.Update.AddToSetEach("Roles", roles);
+
+            var updateResult = await users.UpdateOneAsync(x => x.Id == id, update);
+
+            return updateResult.IsAcknowledged;
+        }
+
+
         public async Task<User> GetUserByIdAsync(string id)
         {
             return await users.Find(x => x.Id == id).FirstOrDefaultAsync();
@@ -145,7 +160,7 @@ namespace MessagePush.Service
             return true;
         }
 
-        private static void AddRolesToClaims(List<Claim> claims, List<string> roles)
+        private static void AddRolesToClaims(List<Claim> claims, IEnumerable<string> roles)
         {
             foreach (string role in roles)
             {

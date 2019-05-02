@@ -22,7 +22,7 @@ namespace MessagePush.Model
         {
             Validated = false;
             Subscribers = new List<int>();
-            Roles = new List<string>() { Role.Standard };
+            Roles = new HashSet<string>() { Role.Standard };
             RegisteredAt = DateTime.Now;
 
             using (RandomNumberGenerator rng = new RNGCryptoServiceProvider())
@@ -64,6 +64,6 @@ namespace MessagePush.Model
         [BsonElement("RegisteredAt")]
         public DateTime RegisteredAt { get; set; }
         [BsonElement("Roles")]
-        public List<string> Roles { get; set; }
+        public HashSet<string> Roles { get; set; }
     }
 }

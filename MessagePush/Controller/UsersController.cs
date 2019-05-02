@@ -76,6 +76,17 @@ namespace MessagePush.Controller
             return Ok(await userService.GetUserByIdAsync(id));
         }
 
+        [Authorize]
+        [HttpGet("user/token/refresh")]
+        public async Task<ActionResult> RefreshUserToken()
+        {
+            var id = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
+
+            var tokens = await userService.RefreshUserToken(id);
+
+            return Ok(new { tokens.AdminToken, tokens.PushToken });
+        }
+
         [Authorize(Roles = "Admin")]
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> GetUserById(string id)
@@ -148,7 +159,7 @@ namespace MessagePush.Controller
         }
 
         [Authorize(Roles = "Standard")]
-        [HttpDelete("self")]
+        [HttpDelete("user")]
         public async Task<ActionResult> RemoveUserByUser()
         {
             var id = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;

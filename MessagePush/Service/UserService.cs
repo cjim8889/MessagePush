@@ -27,6 +27,12 @@ namespace MessagePush.Service
             this.configuration = configuration;
         }
 
+        public class TokenPair
+        {
+            public string AdminToken { get; set; }
+            public string PushToken { get; set; }
+        }
+
         public async Task CreateUserAsync(User user)
         {
             user.Password = HashString(user.Password);
@@ -103,7 +109,7 @@ namespace MessagePush.Service
             await users.DeleteOneAsync(x => x.Id == id);
         }
 
-        public async Task<string[]> RefreshUserToken(string id)
+        public async Task<TokenPair> RefreshUserToken(string id)
         {
 
             var adminToken = GenerateToken();
@@ -114,7 +120,7 @@ namespace MessagePush.Service
 
             if (result.IsAcknowledged)
             {
-                return new string[] { adminToken, pushToken };
+                return new TokenPair() { AdminToken = adminToken, PushToken = pushToken };
             }
 
             return null;

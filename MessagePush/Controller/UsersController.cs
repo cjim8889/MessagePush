@@ -10,6 +10,7 @@ using MessagePush.Model;
 using Microsoft.AspNetCore.Authorization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Cors;
 
 namespace MessagePush.Controller
 {
@@ -186,6 +187,7 @@ namespace MessagePush.Controller
                 : (ActionResult)BadRequest(new ReturnMessage() { StatusCode = 2, Message = "Invalid Admin Token" });
         }
 
+        //[EnableCors("AllowAny")]
         [AllowAnonymous]
         [HttpGet("login")]
         public async Task<ActionResult> LogIn([FromQuery] string email, [FromQuery] string password)

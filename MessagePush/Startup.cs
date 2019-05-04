@@ -29,6 +29,16 @@ namespace MessagePush
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAny",
+                    builder =>
+                    {
+                        builder.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin();
+                    });
+            });
+
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             services.AddAuthentication(x =>
@@ -74,6 +84,7 @@ namespace MessagePush
                 app.UseHsts();
             }
 
+            app.UseCors("AllowAny");
             app.UseHttpsRedirection();
             app.UseAuthentication();
 

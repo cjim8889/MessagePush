@@ -176,6 +176,20 @@ namespace MessagePush.Controller
             return BadRequest();
         }
 
+        [Authorize]
+        [HttpGet("user/password/change")]
+        public async Task<ActionResult> ChangeUserPassword(string password)
+        {
+            var id = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
+
+            if (await userService.ChangeUserPassword(id, password))
+            {
+                return Ok();
+            }
+
+            return BadRequest();
+        }
+
         [AllowAnonymous]
         [HttpGet("login/{adminToken}")]
         public async Task<ActionResult> LogInByAdminToken(string adminToken)

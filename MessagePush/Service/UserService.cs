@@ -178,23 +178,35 @@ namespace MessagePush.Service
             return user != null;
         }
 
+        public async Task<bool> ChangeUserPassword(string id, string password)
+        {
+            if (!ValidatePassword(password))
+            {
+                return false;
+            }
+
+            var update = Builders<User>.Update.Set("Password", HashString(password));
+            var updateResult = await users.UpdateOneAsync(x => x.Id == id, update);
+
+            return updateResult.IsAcknowledged;
+        }
 
 
         public bool ValidateUserData(User user)
         {
-            return ValidatePassword(user) & ValidateEmail(user);
+            return ValidatePassword(user.Password) & ValidateEmail(user.Email);
         }
 
-        private bool ValidateEmail(User user)
+        private bool ValidateEmail(string email)
         {
-            if (string.IsNullOrWhiteSpace(user.Email))
+            if (string.IsNullOrWhiteSpace(email))
             {
                 return false;
             }
 
             try
             {
-                return Regex.IsMatch(user.Email,
+                return Regex.IsMatch(email,
                     @"^(?("")("".+?(?<!\\)""@)|(([0-9a-z]((\.(?!\.))|[-!#\$%&'\*\+/=\?\^`\{\}\|~\w])*)(?<=[0-9a-z])@))" +
                     @"(?(\[)(\[(\d{1,3}\.){3}\d{1,3}\])|(([0-9a-z][-0-9a-z]*[0-9a-z]*\.)+[a-z0-9][\-a-z0-9]{0,22}[a-z0-9]))$",
                     RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(250));
@@ -204,13 +216,13 @@ namespace MessagePush.Service
                 return false;
             }
         }
-        private bool ValidatePassword(User user)
+        private bool ValidatePassword(string password)
         {
-            if (string.IsNullOrWhiteSpace(user.Password) || user.Password.Length < 8)
+            if (string.IsNullOrWhiteSpace(password) || password.Length < 8)
             {
                 return false;
             }
-            else if (user.Password.Length > 64)
+            else if (password.Length > 64)
             {
                 return false;
             }

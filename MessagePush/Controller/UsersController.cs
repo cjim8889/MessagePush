@@ -22,6 +22,7 @@ namespace MessagePush.Controller
         {
             public string Email { get; set; }
             public string Password { get; set; }
+            public string RecaptchaToken {get; set;}
         }
 
         public class AddRoles
@@ -35,9 +36,11 @@ namespace MessagePush.Controller
         }
 
         private readonly UserService userService;
-        public UsersController(UserService userService)
+        private readonly RecaptchaService recaptchaService;
+        public UsersController(UserService userService, RecaptchaService recaptchaService)
         {
             this.userService = userService;
+            this.recaptchaService = recaptchaService;
         }
 
         [Authorize(Roles = "Admin")]
@@ -47,11 +50,23 @@ namespace MessagePush.Controller
             return await userService.GetUsersAsync();
         }
 
-        //[Authorize(Roles = "Admin")]
         [AllowAnonymous]
         [HttpPost]
         public async Task<ActionResult> CreateUser(UserDTO userDTO)
         {
+            var isAdmin = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role && c.Value == Role.Admin) != null;
+
+            if (!isAdmin) {
+                if (string.IsNullOrWhiteSpace(userDTO.RecaptchaToken))
+                {
+                    return BadRequest(new ReturnMessage() { StatusCode = 399, Message = "Empty Captcha Token"});
+                }
+
+                if (!await recaptchaService.Authenticate(userDTO.RecaptchaToken))
+                {
+                    return BadRequest(new ReturnMessage() { StatusCode = 400, Message = "Invalid Captcha Token" });
+                }
+            }
             var user = new User() { Email = userDTO.Email, Password = userDTO.Password };
 
             if (!userService.ValidateUserData(user))
@@ -217,5 +232,7 @@ namespace MessagePush.Controller
                 ? Ok(new ReturnMessage() { StatusCode = 1, Message = userService.GenerateJwtToken(user, DateTime.Now.AddHours(1)) })
                 : (ActionResult)BadRequest(new ReturnMessage() { StatusCode = 2, Message = "Invalid Email Or Password" });
         }
+
+
     }
 }

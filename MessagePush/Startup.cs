@@ -67,6 +67,7 @@ namespace MessagePush
                 });
 
             services.AddSingleton<DatabaseContext>();
+            services.AddSingleton<RecaptchaService>();
 
             services.AddScoped<UserService>();
         }
@@ -85,7 +86,7 @@ namespace MessagePush
             }
 
             app.UseCors("AllowAny");
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
             app.UseAuthentication();
 
             app.UseDefaultFiles();

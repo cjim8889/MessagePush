@@ -59,24 +59,24 @@ namespace MessagePush.Controller
             if (!isAdmin) {
                 if (string.IsNullOrWhiteSpace(userDTO.RecaptchaToken))
                 {
-                    return BadRequest(new ReturnMessage() { StatusCode = 399, Message = "Empty Captcha Token"});
+                    return BadRequest(new ReturnMessage() { StatusCode = Model.StatusCode.EmptyRecaptchaToken, Message = "Empty Captcha Token"});
                 }
 
                 if (!await recaptchaService.Authenticate(userDTO.RecaptchaToken))
                 {
-                    return BadRequest(new ReturnMessage() { StatusCode = 400, Message = "Invalid Captcha Token" });
+                    return BadRequest(new ReturnMessage() { StatusCode = Model.StatusCode.InvalidRecaptchaToken, Message = "Invalid Captcha Token" });
                 }
             }
             var user = new User() { Email = userDTO.Email, Password = userDTO.Password };
 
             if (!userService.ValidateUserData(user))
             {
-                return BadRequest(new ReturnMessage() { StatusCode = 665, Message = "Invalid Email Or Password" });
+                return BadRequest(new ReturnMessage() { StatusCode = Model.StatusCode.InvalidEmailOrPassword, Message = "Invalid Email Or Password" });
             }
 
             if (await userService.IsEmailExistsAsync(user.Email))
             {
-                return BadRequest(new ReturnMessage() { StatusCode = 666, Message = "Duplicate email address" });
+                return BadRequest(new ReturnMessage() { StatusCode = Model.StatusCode.DuplicateEmail, Message = "Duplicate email address" });
             }
 
 
@@ -212,8 +212,8 @@ namespace MessagePush.Controller
             var user = await userService.GetUserByAdminTokenAsync(adminToken);
 
             return user != null
-                ? Ok(new ReturnMessage() { StatusCode = 1, Message = userService.GenerateJwtToken(user, DateTime.Now.AddHours(1))})
-                : (ActionResult)BadRequest(new ReturnMessage() { StatusCode = 2, Message = "Invalid Admin Token" });
+                ? Ok(new ReturnMessage() { StatusCode = Model.StatusCode.Success, Message = userService.GenerateJwtToken(user, DateTime.Now.AddHours(1))})
+                : (ActionResult)BadRequest(new ReturnMessage() { StatusCode = Model.StatusCode.InvalidAdminToken, Message = "Invalid Admin Token" });
         }
 
         //[EnableCors("AllowAny")]
@@ -229,8 +229,8 @@ namespace MessagePush.Controller
             var user = await userService.GetUserByEmailAndPasswordAsync(email, password);
 
             return user != null
-                ? Ok(new ReturnMessage() { StatusCode = 1, Message = userService.GenerateJwtToken(user, DateTime.Now.AddHours(1)) })
-                : (ActionResult)BadRequest(new ReturnMessage() { StatusCode = 2, Message = "Invalid Email Or Password" });
+                ? Ok(new ReturnMessage() { StatusCode = Model.StatusCode.Success, Message = userService.GenerateJwtToken(user, DateTime.Now.AddHours(1)) })
+                : (ActionResult)BadRequest(new ReturnMessage() { StatusCode = Model.StatusCode.InvalidEmailOrPassword, Message = "Invalid Email Or Password" });
         }
 
 

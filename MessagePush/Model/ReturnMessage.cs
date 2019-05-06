@@ -7,7 +7,17 @@ namespace MessagePush.Model
 {
     public class ReturnMessage
     {
-        public int StatusCode { get; set; }
-        public string Message { get; set; }
+        public StatusCode StatusCode { get; set; }
+        public object Message { get; set; }
+    }
+
+    public enum StatusCode
+    {
+        InvalidAdminToken = 1,
+        Success = 2,
+        InvalidEmailOrPassword = 3,
+        DuplicateEmail = 4,
+        InvalidRecaptchaToken = 5,
+        EmptyRecaptchaToken = 6
     }
 }
